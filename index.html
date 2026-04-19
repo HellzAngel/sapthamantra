@@ -248,6 +248,110 @@
       pointer-events: all;
     }
     .cta:hover { background: var(--gold); color: #080705; }
+
+    /* ══════════════════════════════
+       Mobile — hamburger menu
+    ══════════════════════════════ */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      pointer-events: all;
+      z-index: 25;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px; height: 1.5px;
+      background: var(--gold);
+      transition: transform 0.35s, opacity 0.35s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    /* Mobile full-screen nav overlay */
+    #mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(8,7,5,0.97);
+      z-index: 22;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+    }
+    #mobile-menu.open { display: flex; }
+    #mobile-menu a {
+      color: var(--dim);
+      text-decoration: none;
+      font-size: 22px;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      transition: color 0.3s;
+    }
+    #mobile-menu a:hover { color: var(--gold); }
+
+    /* ══════════════════════════════
+       Responsive breakpoints
+    ══════════════════════════════ */
+    @media (max-width: 768px) {
+      nav {
+        padding: 22px 24px;
+      }
+      .logo {
+        font-size: 15px;
+        letter-spacing: 4px;
+      }
+      .logo span { letter-spacing: 5px; }
+      nav ul { display: none; }
+      .hamburger { display: flex; }
+
+      .section {
+        padding: 100px 6vw;
+        min-height: 100svh;
+      }
+      .section.right {
+        justify-content: flex-start;
+      }
+      .block, .block.wide {
+        max-width: 100%;
+      }
+
+      h1 { font-size: clamp(2rem, 9vw, 3rem); letter-spacing: 1px; }
+      h2 { font-size: clamp(1.6rem, 7vw, 2.4rem); }
+      .lead { font-size: 14px; }
+      .big-stat { font-size: clamp(4rem, 22vw, 7rem); }
+
+      .service-list li { font-size: 13px; letter-spacing: 1px; }
+
+      .cta { padding: 13px 28px; font-size: 10px; letter-spacing: 3px; }
+
+      #aperture-svg {
+        width: min(90vw, 90vh);
+        height: min(90vw, 90vh);
+      }
+
+      /* Contact links stack nicely */
+      #contact [style*="display:flex"] {
+        width: 100%;
+        align-items: flex-start;
+        padding: 0 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      nav { padding: 18px 20px; }
+      .logo { font-size: 13px; letter-spacing: 3px; }
+      .logo .tagline-logo { display: none; }
+      .section { padding: 90px 5vw; }
+      h1 { font-size: clamp(1.8rem, 10vw, 2.6rem); }
+      h2 { font-size: clamp(1.5rem, 8vw, 2.2rem); }
+      .big-stat { font-size: clamp(3.5rem, 24vw, 6rem); }
+    }
   </style>
 </head>
 <body>
@@ -290,7 +394,18 @@
       <li><a href="#services">Services</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
   </nav>
+
+  <!-- Mobile fullscreen menu -->
+  <div id="mobile-menu">
+    <a href="#portfolio" onclick="toggleMenu()">Portfolio</a>
+    <a href="#about"     onclick="toggleMenu()">About</a>
+    <a href="#services"  onclick="toggleMenu()">Services</a>
+    <a href="#contact"   onclick="toggleMenu()">Contact</a>
+  </div>
 
   <!-- ═══════════════════ Sections ═══════════════════ -->
   <div id="scroll-content">
@@ -648,6 +763,13 @@
       renderer.setSize(innerWidth, innerHeight);
       composer.setSize(innerWidth, innerHeight);
     });
+  </script>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById('hamburger').classList.toggle('open');
+      document.getElementById('mobile-menu').classList.toggle('open');
+    }
   </script>
 </body>
 </html>
