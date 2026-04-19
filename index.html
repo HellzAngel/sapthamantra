@@ -250,6 +250,197 @@
     .cta:hover { background: var(--gold); color: #080705; }
 
     /* ══════════════════════════════
+       Gallery
+    ══════════════════════════════ */
+    #gallery-section {
+      position: relative;
+      z-index: 10;
+      padding: 80px 8vw 80px;
+      text-align: center;
+    }
+    .gallery-heading {
+      margin-bottom: 16px;
+    }
+    .gallery-heading .label { margin-bottom: 16px; }
+    .gallery-heading h2 {
+      font-size: clamp(1.9rem, 4vw, 3.2rem);
+      font-weight: 300;
+      color: var(--light);
+      letter-spacing: 1px;
+    }
+    .gallery-divider {
+      width: 44px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 22px auto 44px;
+    }
+    .masonry {
+      columns: 3;
+      column-gap: 10px;
+    }
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid rgba(201,168,76,0.12);
+    }
+
+    /* Base warm-toned film grade matching the dark gold theme */
+    .masonry-item img {
+      width: 100%;
+      display: block;
+      filter: brightness(0.80) saturate(0.70) sepia(0.22) contrast(1.05);
+      transition: transform 0.7s cubic-bezier(.16,1,.3,1),
+                  filter 0.5s ease;
+    }
+    .masonry-item:hover img {
+      transform: scale(1.06);
+      filter: brightness(0.95) saturate(0.90) sepia(0.08) contrast(1.08);
+    }
+
+    /* Gold shimmer border on hover */
+    .masonry-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      border: 1px solid rgba(201,168,76,0);
+      transition: border-color 0.4s;
+      pointer-events: none;
+    }
+    .masonry-item:hover::before {
+      border-color: rgba(201,168,76,0.6);
+    }
+
+    /* Warm vignette + gold tint overlay */
+    .masonry-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        radial-gradient(ellipse at center, transparent 40%, rgba(8,7,5,0.55) 100%),
+        linear-gradient(135deg, rgba(201,168,76,0.0) 0%, rgba(8,7,5,0.2) 100%);
+      transition: opacity 0.4s;
+      pointer-events: none;
+      opacity: 1;
+    }
+    .masonry-item:hover::after {
+      opacity: 0.4;
+    }
+
+    /* Overlay with zoom icon + caption */
+    .masonry-item .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      background: linear-gradient(
+        to top,
+        rgba(8,7,5,0.75) 0%,
+        rgba(8,7,5,0.15) 50%,
+        transparent 100%
+      );
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.45s ease;
+    }
+    .masonry-item:hover .overlay { opacity: 1; }
+
+    .overlay-icon {
+      width: 42px; height: 42px;
+      border: 1px solid rgba(201,168,76,0.7);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      transform: scale(0.8);
+      transition: transform 0.4s cubic-bezier(.16,1,.3,1);
+    }
+    .masonry-item:hover .overlay-icon {
+      transform: scale(1);
+    }
+
+    /* Grain texture overlay (CSS noise) */
+    .masonry-item .grain {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px;
+    }
+
+    /* Lightbox */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4,3,2,0.97);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img {
+      max-width: 86vw;
+      max-height: 84vh;
+      object-fit: contain;
+      border: 1px solid rgba(201,168,76,0.2);
+      filter: brightness(0.92) saturate(0.85) sepia(0.12) contrast(1.05);
+    }
+    #lb-close {
+      position: absolute;
+      top: 28px; right: 36px;
+      color: var(--gold);
+      font-size: 28px;
+      cursor: pointer;
+      line-height: 1;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+    #lb-close:hover { opacity: 1; }
+    #lb-prev, #lb-next {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      color: var(--gold);
+      font-size: 36px;
+      cursor: pointer;
+      padding: 20px;
+      opacity: 0.6;
+      transition: opacity 0.3s;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      user-select: none;
+    }
+    #lb-prev:hover, #lb-next:hover { opacity: 1; }
+    #lb-prev { left: 16px; }
+    #lb-next { right: 16px; }
+    #lb-counter {
+      position: absolute;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--dim);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    @media (max-width: 768px) {
+      #gallery-section { padding: 60px 4vw 50px; }
+      .masonry { columns: 2; column-gap: 7px; }
+      .masonry-item { margin-bottom: 7px; }
+    }
+    @media (max-width: 480px) {
+      .masonry { columns: 1; }
+    }
+
+    /* ══════════════════════════════
        Mobile — hamburger menu
     ══════════════════════════════ */
     .hamburger {
@@ -438,6 +629,65 @@
         <p class="lead">photographs taken across five countries, four seasons, and countless irreplaceable moments.</p>
       </div>
     </section>
+
+  </div><!-- /scroll-content -->
+
+  <!-- ═══════════════════ Gallery ═══════════════════ -->
+  <section id="gallery-section">
+    <div class="gallery-heading">
+      <span class="label">Our Work</span>
+      <h2>Moments we've<br>made eternal</h2>
+    </div>
+    <div class="gallery-divider"></div>
+    <div class="masonry" id="masonry">
+      <div class="masonry-item" onclick="openLightbox(0)">
+        <img src="images/005-1.jpeg" alt="Sapthamantra Photography" loading="lazy" />
+        <div class="grain"></div>
+        <div class="overlay"><div class="overlay-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div></div>
+      </div>
+      <div class="masonry-item" onclick="openLightbox(1)">
+        <img src="images/006-5.jpeg" alt="Sapthamantra Photography" loading="lazy" />
+        <div class="grain"></div>
+        <div class="overlay"><div class="overlay-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div></div>
+      </div>
+      <div class="masonry-item" onclick="openLightbox(2)">
+        <img src="images/007-1.jpeg" alt="Sapthamantra Photography" loading="lazy" />
+        <div class="grain"></div>
+        <div class="overlay"><div class="overlay-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div></div>
+      </div>
+      <div class="masonry-item" onclick="openLightbox(3)">
+        <img src="images/01-1.jpeg" alt="Sapthamantra Photography" loading="lazy" />
+        <div class="grain"></div>
+        <div class="overlay"><div class="overlay-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div></div>
+      </div>
+      <div class="masonry-item" onclick="openLightbox(4)">
+        <img src="images/04.jpeg" alt="Sapthamantra Photography" loading="lazy" />
+        <div class="grain"></div>
+        <div class="overlay"><div class="overlay-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div></div>
+      </div>
+      <div class="masonry-item" onclick="openLightbox(5)">
+        <img src="images/06.jpeg" alt="Sapthamantra Photography" loading="lazy" />
+        <div class="grain"></div>
+        <div class="overlay"><div class="overlay-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div></div>
+      </div>
+      <div class="masonry-item" onclick="openLightbox(6)">
+        <img src="images/08.jpeg" alt="Sapthamantra Photography" loading="lazy" />
+        <div class="grain"></div>
+        <div class="overlay"><div class="overlay-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div id="lightbox">
+    <span id="lb-close" onclick="closeLightbox()">&#x2715;</span>
+    <span id="lb-prev" onclick="lbNav(-1)">&#8249;</span>
+    <img id="lb-img" src="" alt="" />
+    <span id="lb-next" onclick="lbNav(1)">&#8250;</span>
+    <div id="lb-counter"></div>
+  </div>
+
+  <div id="scroll-content"><!-- services, stats, contact -->
 
     <section class="section" id="services">
       <div class="block">
@@ -770,6 +1020,39 @@
       document.getElementById('hamburger').classList.toggle('open');
       document.getElementById('mobile-menu').classList.toggle('open');
     }
+
+    // Lightbox
+    const LB_IMGS = [
+      'images/005-1.jpeg','images/006-5.jpeg','images/007-1.jpeg',
+      'images/01-1.jpeg','images/04.jpeg','images/06.jpeg',
+      'images/08.jpeg'
+    ];
+    let lbIdx = 0;
+
+    function openLightbox(i) {
+      lbIdx = i;
+      document.getElementById('lb-img').src = LB_IMGS[lbIdx];
+      document.getElementById('lb-counter').textContent = (lbIdx+1) + ' / ' + LB_IMGS.length;
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function lbNav(dir) {
+      lbIdx = (lbIdx + dir + LB_IMGS.length) % LB_IMGS.length;
+      document.getElementById('lb-img').src = LB_IMGS[lbIdx];
+      document.getElementById('lb-counter').textContent = (lbIdx+1) + ' / ' + LB_IMGS.length;
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') lbNav(1);
+      if (e.key === 'ArrowLeft')  lbNav(-1);
+    });
+    document.getElementById('lightbox').addEventListener('click', function(e) {
+      if (e.target === this) closeLightbox();
+    });
   </script>
 </body>
 </html>
