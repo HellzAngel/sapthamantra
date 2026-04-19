@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sapthamantra — Seven Mantras. Infinite Memories.</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --gold:  #c9a84c;
+      --light: #f0e6c8;
+      --dim:   rgba(240,230,200,0.5);
+      --bg:    #080705;
+    }
+
+    body {
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      overflow-x: hidden;
+    }
+
+    #canvas-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    #progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      width: 0%;
+      background: linear-gradient(90deg, #c9a84c, #f5deb3, #c9a84c);
+      z-index: 30;
+      transition: width 0.1s linear;
+    }
+
+    /* ── Navigation ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 28px 52px;
+      background: linear-gradient(to bottom, rgba(8,7,5,0.75) 0%, transparent 100%);
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .logo span {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 9px;
+      color: var(--dim);
+      margin-top: 3px;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+    .logo .tagline-logo {
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      color: rgba(201,168,76,0.3);
+      margin-top: 3px;
+      font-family: 'Georgia', serif;
+      font-style: italic;
+      text-transform: none;
+    }
+    nav ul { list-style: none; display: flex; gap: 38px; }
+    nav a {
+      color: var(--dim);
+      text-decoration: none;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      transition: color 0.3s;
+    }
+    nav a:hover { color: var(--gold); }
+
+    /* ── Aperture decoration ── */
+    #aperture-svg {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(68vw, 68vh);
+      height: min(68vw, 68vh);
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.09;
+      transition: opacity 0.6s;
+      animation: apt-spin 30s linear infinite;
+    }
+    @keyframes apt-spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+    /* ── Scroll hint ── */
+    #scroll-hint {
+      position: fixed;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transition: opacity 0.6s;
+    }
+    #scroll-hint span {
+      font-size: 9px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--dim);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 44px;
+      background: linear-gradient(to bottom, rgba(201,168,76,0.8), transparent);
+      animation: line-drop 2s ease-in-out infinite;
+    }
+    @keyframes line-drop {
+      0%   { transform: scaleY(0); transform-origin: top; }
+      50%  { transform: scaleY(1); transform-origin: top; }
+      51%  { transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+
+    /* ── Scrollable sections ── */
+    #scroll-content {
+      position: relative;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 130px 10vw;
+    }
+    .section.center { justify-content: center; text-align: center; }
+    .section.right  { justify-content: flex-end; }
+
+    .block {
+      max-width: 540px;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s cubic-bezier(.16,1,.3,1),
+                  transform 1s cubic-bezier(.16,1,.3,1);
+    }
+    .block.visible { opacity: 1; transform: translateY(0); }
+    .block.wide    { max-width: 700px; }
+
+    .label {
+      display: inline-block;
+      font-size: 10px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 22px;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 5rem);
+      font-weight: 300;
+      line-height: 1.1;
+      letter-spacing: 2px;
+      color: var(--light);
+    }
+    h2 {
+      font-size: clamp(1.9rem, 4vw, 3.4rem);
+      font-weight: 300;
+      line-height: 1.15;
+      letter-spacing: 1px;
+      color: var(--light);
+    }
+    .lead {
+      margin-top: 26px;
+      font-size: 15px;
+      line-height: 1.85;
+      color: var(--dim);
+      font-weight: 300;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+    .divider {
+      width: 44px; height: 1px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+      margin: 22px 0;
+    }
+    .center .divider { margin: 22px auto; }
+
+    .big-stat {
+      font-size: clamp(4.5rem, 16vw, 12rem);
+      font-weight: 700;
+      line-height: 0.9;
+      background: linear-gradient(135deg, #c9a84c 0%, #f5deb3 50%, #c9a84c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .service-list {
+      margin-top: 28px;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .service-list li {
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: var(--dim);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      padding-left: 22px;
+      position: relative;
+    }
+    .service-list li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      width: 9px; height: 1px;
+      background: var(--gold);
+      transform: translateY(-50%);
+    }
+
+    .cta {
+      display: inline-block;
+      margin-top: 38px;
+      padding: 14px 40px;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      transition: background 0.35s, color 0.35s;
+      pointer-events: all;
+    }
+    .cta:hover { background: var(--gold); color: #080705; }
+  </style>
+</head>
+<body>
+
+  <div id="progress"></div>
+  <div id="canvas-wrap"></div>
+
+  <!-- Camera aperture SVG -->
+  <svg id="aperture-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="95"  stroke="#c9a84c" stroke-width="0.5"/>
+    <circle cx="100" cy="100" r="78"  stroke="#c9a84c" stroke-width="0.25"/>
+    <circle cx="100" cy="100" r="60"  stroke="#c9a84c" stroke-width="0.5"/>
+    <circle cx="100" cy="100" r="30"  stroke="#c9a84c" stroke-width="0.4"/>
+    <circle cx="100" cy="100" r="11"  stroke="#c9a84c" stroke-width="0.9"/>
+    <g stroke="#c9a84c" stroke-width="0.45">
+      <line x1="100" y1="5"   x2="100" y2="42" />
+      <line x1="100" y1="158" x2="100" y2="195"/>
+      <line x1="5"   y1="100" x2="42"  y2="100"/>
+      <line x1="158" y1="100" x2="195" y2="100"/>
+      <line x1="28"  y1="28"  x2="53"  y2="53" />
+      <line x1="147" y1="147" x2="172" y2="172"/>
+      <line x1="172" y1="28"  x2="147" y2="53" />
+      <line x1="53"  y1="147" x2="28"  y2="172"/>
+      <line x1="54"  y1="15"  x2="63"  y2="50" />
+      <line x1="146" y1="15"  x2="137" y2="50" />
+      <line x1="15"  y1="54"  x2="50"  y2="63" />
+      <line x1="15"  y1="146" x2="50"  y2="137"/>
+      <line x1="185" y1="54"  x2="150" y2="63" />
+      <line x1="185" y1="146" x2="150" y2="137"/>
+      <line x1="54"  y1="185" x2="63"  y2="150"/>
+      <line x1="146" y1="185" x2="137" y2="150"/>
+    </g>
+  </svg>
+
+  <nav>
+    <div class="logo">Sapthamantra<span>Photography</span><span class="tagline-logo">Seven Mantras. Infinite Memories.</span></div>
+    <ul>
+      <li><a href="#portfolio">Portfolio</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══════════════════ Sections ═══════════════════ -->
+  <div id="scroll-content">
+
+    <section class="section center" id="hero">
+      <div class="block wide">
+        <span class="label">Nikhil Raju &amp; Devika Chandran</span>
+        <h1>Every frame<br>tells a story</h1>
+        <p style="font-size:13px;letter-spacing:3px;color:rgba(201,168,76,0.6);font-family:'Georgia',serif;font-style:italic;margin-top:14px;">Seven Mantras. Infinite Memories.</p>
+        <div class="divider"></div>
+        <p class="lead">Sapthamantra captures the poetry hidden in ordinary moments — through light, shadow, and the decisive instant that makes a photograph eternal.</p>
+        <a class="cta" href="#portfolio">View Portfolio</a>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="block">
+        <span class="label">Philosophy</span>
+        <h2>Light is the only<br>true medium</h2>
+        <div class="divider"></div>
+        <p class="lead">Photography is not about equipment — it is about presence, patience, and the courage to wait for the perfect light to fall on a perfect subject.</p>
+      </div>
+    </section>
+
+    <section class="section right" id="portfolio">
+      <div class="block">
+        <span class="label">Captured Moments</span>
+        <div class="big-stat">10K+</div>
+        <div class="divider"></div>
+        <p class="lead">photographs taken across five countries, four seasons, and countless irreplaceable moments.</p>
+      </div>
+    </section>
+
+    <section class="section" id="services">
+      <div class="block">
+        <span class="label">What We Do</span>
+        <h2>From portraits<br>to landscapes</h2>
+        <div class="divider"></div>
+        <ul class="service-list">
+          <li>Wedding &amp; Couple Photography</li>
+          <li>Editorial &amp; Fashion</li>
+          <li>Landscape &amp; Travel</li>
+          <li>Corporate &amp; Brand</li>
+          <li>Fine Art Prints</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section right" id="stats">
+      <div class="block">
+        <span class="label">Happy Clients</span>
+        <div class="big-stat">400+</div>
+        <div class="divider"></div>
+        <p class="lead">families, brands, and individuals who trusted us with their most cherished memories.</p>
+      </div>
+    </section>
+
+    <section class="section center" id="contact">
+      <div class="block wide">
+        <span class="label">Begin Your Story</span>
+        <h2>Let us capture<br>your moment</h2>
+        <div class="divider"></div>
+        <p class="lead">Reach out to discuss your vision. Every great photograph starts with a conversation.</p>
+        <div style="margin-top:36px;display:flex;flex-direction:column;align-items:center;gap:18px;pointer-events:all;">
+          <a href="mailto:nikhilrajuphotography@gmail.com"
+             style="display:flex;align-items:center;gap:12px;color:var(--gold);text-decoration:none;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;letter-spacing:2px;transition:opacity 0.3s;"
+             onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            nikhilrajuphotography@gmail.com
+          </a>
+          <a href="tel:+919373139822"
+             style="display:flex;align-items:center;gap:12px;color:var(--gold);text-decoration:none;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;letter-spacing:2px;transition:opacity 0.3s;"
+             onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z"/></svg>
+            +91 93731 39822
+          </a>
+        </div>
+        <a class="cta" href="mailto:nikhilrajuphotography@gmail.com" style="margin-top:36px;">Get In Touch</a>
+      </div>
+    </section>
+
+  </div>
+
+  <div id="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+
+  <!-- ═══════════════════ Three.js ═══════════════════ -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { EffectComposer }  from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass }      from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+    /* ── Renderer ── */
+    const wrap = document.getElementById('canvas-wrap');
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    wrap.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x080705);
+    scene.fog = new THREE.FogExp2(0x080705, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 300);
+    camera.position.set(0, 0, 42);
+
+    /* ── Bloom ── */
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    composer.addPass(new UnrealBloomPass(
+      new THREE.Vector2(innerWidth, innerHeight),
+      1.0, 0.5, 0.12
+    ));
+
+    /* ══════════════════════════════════
+       Bokeh sprites (shallow-DOF light orbs)
+    ══════════════════════════════════ */
+    function bokehTexture(color) {
+      const c = document.createElement('canvas');
+      c.width = c.height = 128;
+      const ctx = c.getContext('2d');
+      const g = ctx.createRadialGradient(64,64,0, 64,64,64);
+      g.addColorStop(0,   color);
+      g.addColorStop(0.35, color.replace('1)', '0.35)'));
+      g.addColorStop(1,   'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(64,64,64,0,Math.PI*2); ctx.fill();
+      return new THREE.CanvasTexture(c);
+    }
+
+    const BOKEH_COLORS = [
+      'rgba(201,168,76,1)',
+      'rgba(245,222,179,1)',
+      'rgba(255,210,90,1)',
+      'rgba(255,245,200,1)',
+      'rgba(180,130,40,1)',
+    ];
+
+    const bokehGroup = new THREE.Group();
+    scene.add(bokehGroup);
+    const bokehList = [];
+
+    for (let i = 0; i < 200; i++) {
+      const col = BOKEH_COLORS[i % BOKEH_COLORS.length];
+      const mat = new THREE.SpriteMaterial({
+        map: bokehTexture(col),
+        transparent: true,
+        opacity: 0.06 + Math.random() * 0.22,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+      const s = new THREE.Sprite(mat);
+      s.scale.setScalar(0.9 + Math.random() * 5);
+      s.position.set(
+        (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 60,
+        (Math.random() - 0.5) * 70 - 5
+      );
+      s.userData = {
+        base:  mat.opacity,
+        phase: Math.random() * Math.PI * 2,
+        spd:   0.15 + Math.random() * 0.45,
+        dx:    (Math.random() - 0.5) * 0.006,
+        dy:    (Math.random() - 0.5) * 0.004,
+      };
+      bokehGroup.add(s);
+      bokehList.push(s);
+    }
+
+    /* ══════════════════════════════════
+       Floating photo frames
+    ══════════════════════════════════ */
+    const frameGroup = new THREE.Group();
+    scene.add(frameGroup);
+    const frameList = [];
+
+    const RATIOS = [[4,3],[3,2],[1,1],[16,9],[2,3]];
+
+    for (let i = 0; i < 26; i++) {
+      const [rw, rh] = RATIOS[i % RATIOS.length];
+      const w = 2.8 + Math.random() * 3.8;
+      const h = w * (rh / rw);
+
+      // Generate a warm dark texture
+      const cv = document.createElement('canvas');
+      cv.width = 128; cv.height = Math.round(128 * rh / rw);
+      const ctx = cv.getContext('2d');
+      const hue = 22 + Math.random() * 40;
+      const grd = ctx.createLinearGradient(0, 0, cv.width, cv.height);
+      grd.addColorStop(0, `hsl(${hue},${20+Math.random()*20}%,${8+Math.random()*10}%)`);
+      grd.addColorStop(1, `hsl(${hue+20},15%,${3+Math.random()*6}%)`);
+      ctx.fillStyle = grd; ctx.fillRect(0, 0, cv.width, cv.height);
+      // vignette
+      const vig = ctx.createRadialGradient(
+        cv.width/2, cv.height/2, cv.height * 0.08,
+        cv.width/2, cv.height/2, cv.height * 0.9
+      );
+      vig.addColorStop(0, 'rgba(0,0,0,0)');
+      vig.addColorStop(1, 'rgba(0,0,0,0.75)');
+      ctx.fillStyle = vig; ctx.fillRect(0, 0, cv.width, cv.height);
+
+      const geo  = new THREE.PlaneGeometry(w, h);
+      const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+        map: new THREE.CanvasTexture(cv),
+        transparent: true,
+        opacity: 0.5 + Math.random() * 0.35
+      }));
+
+      // Gold border
+      const edgeMat = new THREE.LineBasicMaterial({
+        color: 0xc9a84c,
+        transparent: true,
+        opacity: 0.3 + Math.random() * 0.45
+      });
+      mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), edgeMat));
+
+      mesh.position.set(
+        (Math.random() - 0.5) * 60,
+        (Math.random() - 0.5) * 40,
+        -12 - Math.random() * 45
+      );
+      mesh.rotation.set(
+        (Math.random() - 0.5) * 0.55,
+        (Math.random() - 0.5) * 0.75,
+        (Math.random() - 0.5) * 0.35
+      );
+      mesh.userData = {
+        rspd: new THREE.Vector3(
+          (Math.random()-0.5)*0.00025,
+          (Math.random()-0.5)*0.0005,
+          (Math.random()-0.5)*0.00015
+        ),
+        fph:  Math.random() * Math.PI * 2,
+        fspd: 0.18 + Math.random() * 0.38,
+        by:   mesh.position.y
+      };
+      frameGroup.add(mesh);
+      frameList.push(mesh);
+    }
+
+    /* ══════════════════════════════════
+       Dust / grain
+    ══════════════════════════════════ */
+    const dustGeo = new THREE.BufferGeometry();
+    const dustPos = new Float32Array(3500 * 3);
+    for (let i = 0; i < 3500; i++) {
+      dustPos[i*3]   = (Math.random()-0.5)*150;
+      dustPos[i*3+1] = (Math.random()-0.5)*100;
+      dustPos[i*3+2] = (Math.random()-0.5)*130;
+    }
+    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+    scene.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({
+      color: 0xb8960c, size: 0.055, transparent: true, opacity: 0.35, sizeAttenuation: true
+    })));
+
+    /* ══════════════════════════════════
+       Camera waypoints (scroll-driven)
+    ══════════════════════════════════ */
+    const WP = [
+      { p: new THREE.Vector3(  0,  0, 42), t: new THREE.Vector3( 0, 0, 0) },
+      { p: new THREE.Vector3(-18,  6, 30), t: new THREE.Vector3(-4, 1, 0) },
+      { p: new THREE.Vector3( 20, -7, 24), t: new THREE.Vector3( 4,-2, 0) },
+      { p: new THREE.Vector3(-12, 11, 18), t: new THREE.Vector3(-3, 2, 0) },
+      { p: new THREE.Vector3( 22, -4, 14), t: new THREE.Vector3( 4,-1, 0) },
+      { p: new THREE.Vector3(  0, 18, 36), t: new THREE.Vector3( 0, 0, 0) },
+    ];
+
+    /* ── Scroll handling ── */
+    let pct = 0;
+    window.addEventListener('scroll', () => {
+      const max = document.body.scrollHeight - innerHeight;
+      pct = window.scrollY / max;
+      document.getElementById('progress').style.width = (pct * 100).toFixed(2) + '%';
+      document.getElementById('scroll-hint').style.opacity = scrollY > 60 ? '0' : '1';
+      document.getElementById('aperture-svg').style.opacity =
+        Math.max(0, 0.09 - pct * 0.18).toFixed(3);
+    }, { passive: true });
+
+    // Section reveal
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        const b = e.target.querySelector('.block');
+        if (b) b.classList.toggle('visible', e.isIntersecting);
+      });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.section').forEach(s => io.observe(s));
+
+    /* ── Animation loop ── */
+    const clock = new THREE.Clock();
+    const camT  = new THREE.Vector3();
+    const camL  = new THREE.Vector3();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+
+      // Bokeh pulse + drift
+      bokehList.forEach(b => {
+        const d = b.userData;
+        b.material.opacity = d.base * (0.65 + 0.35 * Math.sin(t * d.spd + d.phase));
+        b.position.x += d.dx;
+        b.position.y += d.dy;
+        if (b.position.x >  50) b.position.x = -50;
+        if (b.position.x < -50) b.position.x =  50;
+        if (b.position.y >  30) b.position.y = -30;
+        if (b.position.y < -30) b.position.y =  30;
+      });
+      bokehGroup.rotation.z = t * 0.006;
+
+      // Frame float + gentle rotate
+      frameList.forEach(f => {
+        const d = f.userData;
+        f.position.y = d.by + Math.sin(t * d.fspd + d.fph) * 0.45;
+        f.rotation.x += d.rspd.x;
+        f.rotation.y += d.rspd.y;
+        f.rotation.z += d.rspd.z;
+      });
+
+      // Camera path interpolation
+      const raw  = pct * (WP.length - 1);
+      const idx  = Math.min(Math.floor(raw), WP.length - 2);
+      const fr   = raw - idx;
+      const tp   = new THREE.Vector3().lerpVectors(WP[idx].p, WP[idx+1].p, fr);
+      const tl   = new THREE.Vector3().lerpVectors(WP[idx].t, WP[idx+1].t, fr);
+
+      // Breathing idle sway
+      tp.x += Math.sin(t * 0.22) * 0.55;
+      tp.y += Math.cos(t * 0.17) * 0.32;
+
+      camera.position.lerp(tp, 0.035);
+      camL.lerp(tl, 0.04);
+      camera.lookAt(camL);
+
+      composer.render();
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+      composer.setSize(innerWidth, innerHeight);
+    });
+  </script>
+</body>
+</html>
